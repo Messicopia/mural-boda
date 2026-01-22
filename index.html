@@ -2,46 +2,92 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Mural de la Boda 💍</title>
+  <title>Mural en Vivo 💍</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #fafafa;
+    }
+    #mural {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    img, video {
+      width: 200px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h1>Subí tus fotos y videos 📸🎥</h1>
-  <p>Gracias por ser parte de este día ❤️</p>
+<h1>Mural de la Boda 💕</h1>
+<p>Subí tu foto o video</p>
 
-  <input type="file" id="fileInput" accept="image/*,video/*">
-  <button onclick="upload()">Subir</button>
+<input type="file" id="fileInput" accept="image/*,video/*">
+<button onclick="upload()">Subir</button>
 
-  <p id="status"></p>
+<p id="status"></p>
 
-  <script>
-    function upload() {
-      const file = document.getElementById("fileInput").files[0];
-      if (!file) {
-        alert("Elegí un archivo primero");
-        return;
-      }
+<hr>
 
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "boda-waza");
-      formData.append("cloud_name", "boda-waza");
+<h2>Mural en vivo 🖼️</h2>
+<div id="mural"></div>
 
-      fetch("https://api.cloudinary.com/v1_1/ACA_TU_CLOUD/auto/upload", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("status").innerText =
-          "Archivo subido con éxito 🎉";
-      })
-      .catch(err => {
-        document.getElementById("status").innerText =
-          "Error al subir 😢";
+<script>
+const CLOUD_NAME = "waza123";
+const UPLOAD_PRESET = "boda-waza";
+const FOLDER = "boda-2026";
+
+function upload() {
+  const file = document.getElementById("fileInput").files[0];
+  if (!file) return alert("Elegí un archivo");
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", FOLDER);
+
+  fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+    method: "POST",
+    body: formData
+  })
+  .then(() => {
+    document.getElementById("status").innerText = "Subido 🎉";
+    loadMural();
+  });
+}
+
+function loadMural() {
+  fetch(`https://res.cloudinary.com/${CLOUD_NAME}/image/list/${FOLDER}.json`)
+    .then(res => res.json())
+    .then(data => {
+      const mural = document.getElementById("mural");
+      mural.innerHTML = "";
+
+      data.resources.reverse().forEach(item => {
+        if (item.format === "mp4") {
+          const video = document.createElement("video");
+          video.src = item.secure_url;
+          video.controls = true;
+          mural.appendChild(video);
+        } else {
+          const img = document.createElement("img");
+          img.src = item.secure_url;
+          mural.appendChild(img);
+        }
       });
-    }
-  </script>
+    });
+}
+
+// refresca cada 5 segundos
+setInterval(loadMural, 5000);
+loadMural();
+</script>
 
 </body>
 </html>
