@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mural de la Boda 💍</title>
+</head>
+<body>
+
+  <h1>Subí tus fotos y videos 📸🎥</h1>
+  <p>Gracias por ser parte de este día ❤️</p>
+
+  <input type="file" id="fileInput" accept="image/*,video/*">
+  <button onclick="upload()">Subir</button>
+
+  <p id="status"></p>
+
+  <script>
+    function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      if (!file) {
+        alert("Elegí un archivo primero");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", "boda-waza");
+      formData.append("cloud_name", "boda-waza");
+
+      fetch("https://api.cloudinary.com/v1_1/ACA_TU_CLOUD/auto/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("status").innerText =
+          "Archivo subido con éxito 🎉";
+      })
+      .catch(err => {
+        document.getElementById("status").innerText =
+          "Error al subir 😢";
+      });
+    }
+  </script>
+
+</body>
+</html>
