@@ -1,45 +1,5 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Mural en Vivo 💍</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #fafafa;
-    }
-    #mural {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    img, video {
-      width: 200px;
-      margin: 10px;
-      border-radius: 10px;
-    }
-  </style>
-</head>
-
-<body>
-
-<h1>Mural de la Boda 💕</h1>
-<p>Subí tu foto o video</p>
-
-<input type="file" id="fileInput" accept="image/*,video/*">
-<button onclick="upload()">Subir</button>
-
-<p id="status"></p>
-
-<hr>
-
-<h2>Mural en vivo 🖼️</h2>
-<div id="mural"></div>
-
 <script>
-const CLOUD_NAME = "waza123";
+const CLOUD_NAME = "me cago";
 const UPLOAD_PRESET = "boda-waza";
 const FOLDER = "boda-2026";
 
@@ -63,31 +23,29 @@ function upload() {
 }
 
 function loadMural() {
-  fetch(`https://res.cloudinary.com/${CLOUD_NAME}/image/list/${FOLDER}.json`)
-    .then(res => res.json())
-    .then(data => {
-      const mural = document.getElementById("mural");
-      mural.innerHTML = "";
-
-      data.resources.reverse().forEach(item => {
-        if (item.format === "mp4") {
-          const video = document.createElement("video");
-          video.src = item.secure_url;
-          video.controls = true;
-          mural.appendChild(video);
-        } else {
-          const img = document.createElement("img");
-          img.src = item.secure_url;
-          mural.appendChild(img);
-        }
-      });
-    });
+  const script = document.createElement("script");
+  script.src = `https://res.cloudinary.com/${CLOUD_NAME}/image/search?expression=folder:${FOLDER}&sort_by[]=created_at-desc&max_results=50&callback=renderMural`;
+  document.body.appendChild(script);
 }
 
-// refresca cada 5 segundos
+function renderMural(data) {
+  const mural = document.getElementById("mural");
+  mural.innerHTML = "";
+
+  data.resources.forEach(item => {
+    if (item.resource_type === "video") {
+      const video = document.createElement("video");
+      video.src = item.secure_url;
+      video.controls = true;
+      mural.appendChild(video);
+    } else {
+      const img = document.createElement("img");
+      img.src = item.secure_url;
+      mural.appendChild(img);
+    }
+  });
+}
+
 setInterval(loadMural, 5000);
 loadMural();
 </script>
-
-</body>
-</html>
